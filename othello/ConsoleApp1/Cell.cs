@@ -1,34 +1,79 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace ConsoleApp1
+namespace B19_Ex02_Othelo
 {
-    class Cell
+    public class Cell
     {
-        struct Location
-        {
-            int x;
-            int y;
-        }
-        enum Type
-        {
-            EMPTY = 0, // empty cell
-            BLACK = 1, // X
-            WHITE = 2 // O
-        }
-
         // Members
         private Location m_CellLocation;
-        private Type m_CellType;
-
-        // Methods
-        private bool isCellEmpty()
+        public enum eType
         {
-            bool isEmpty = (m_CellType == Type.EMPTY); // if empty return true
-            return isEmpty;
+            Empty, // empty cell
+            Black, // X
+            White // O
         }
 
-        // Also add getters and setters
+        private eType m_CellType;
+
+        public eType CellType
+        {
+            get
+            {
+                return m_CellType;
+            }
+            set
+            {
+                m_CellType = value;
+            }
+        }
+
+        public struct Location
+        {
+            private int x;
+            private int y;
+
+            public int X
+            {
+                get
+                {
+                    return x;
+                }
+                set
+                {
+                    x = value;
+                }
+            }
+            public int Y
+            {
+                get
+                {
+                    return y;
+                }
+                set
+                {
+                    y = value;
+                }
+            }
+        }
+
+        // Methods
+        public Cell(int i_X, int i_Y, eType i_Type = eType.Empty)
+        { // constructor
+            m_CellLocation = new Location();
+            m_CellType = i_Type;
+            m_CellLocation.X = i_X;
+            m_CellLocation.Y = i_Y;
+        }
+
+        public bool IsCellEmpty()
+        {
+            bool isEmpty = (m_CellType == eType.Empty); // if empty - return true
+
+            return isEmpty;
+        }
     }
 }
