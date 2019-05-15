@@ -47,7 +47,7 @@ namespace B19_Ex02_Othelo
         public Player(ePlayerID i_PlayerID)
         { // constructor
             m_playerID = i_PlayerID;
-            m_Score = 0;
+            m_Score = 2; // 2 coins for each player when game starts
         }
     }
 }

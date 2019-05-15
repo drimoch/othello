@@ -45,10 +45,10 @@ namespace B19_Ex02_Othelo
             cleanBoard();
             int middle = m_MatrixBoard.GetLength(0) / 2;
             Cell c = m_MatrixBoard[middle, middle];
-            m_MatrixBoard[middle - 1, middle - 1].CellType = Cell.eType.White;
-            m_MatrixBoard[middle - 1, middle].CellType = Cell.eType.Black;
-            m_MatrixBoard[middle, middle - 1].CellType = Cell.eType.Black;
-            m_MatrixBoard[middle, middle].CellType = Cell.eType.White;
+            m_MatrixBoard[middle - 1, middle - 1].CellType = Cell.eType.Player2;
+            m_MatrixBoard[middle - 1, middle].CellType = Cell.eType.Player1;
+            m_MatrixBoard[middle, middle - 1].CellType = Cell.eType.Player1;
+            m_MatrixBoard[middle, middle].CellType = Cell.eType.Player2;
         }
 
         public bool IsCellEmpty(Cell i_cell)
@@ -64,6 +64,9 @@ namespace B19_Ex02_Othelo
             }
         }
 
-        private void updateBoard() { }
+        public void UpdateBoard(ref Cell i_Cell, Cell.eType i_Type)
+        {
+            i_Cell.CellType = i_Type;
+        }
     }
 }

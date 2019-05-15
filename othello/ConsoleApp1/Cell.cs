@@ -13,8 +13,8 @@ namespace B19_Ex02_Othelo
         public enum eType
         {
             Empty, // empty cell
-            Black, // X
-            White // O
+            Player1, // X
+            Player2 // O
         }
 
         private eType m_CellType;

@@ -94,13 +94,25 @@ namespace B19_Ex02_Othelo
             {
                 Console.WriteLine("The chosen cell is invalid, please choose another cell:");
             }
+
             if (i_Error == GameManager.eResponseCode.NoValidCellsForPlayer)
             {
                 Console.WriteLine("You have no valid cells. The turn will be moved to the second player");
             }
+
             if (i_Error == GameManager.eResponseCode.NoValidCellsForBothPlayers)
             {
                 Console.WriteLine("Both players have no valid cells");
+            }
+
+            if(i_Error == GameManager.eResponseCode.InvalidMove)
+            {
+                Console.WriteLine("The cell you chose doesn't block the competitor's coins, please try again: ");
+            }
+
+            if(i_Error == GameManager.eResponseCode.NotEmpty)
+            {
+                Console.WriteLine("The chosen cell is not empty, please try again: ");
             }
 
             return location;
@@ -164,11 +176,11 @@ namespace B19_Ex02_Othelo
         private char covertCellTypeToChar(Cell.eType i_Type)
         {
             char type;
-            if (i_Type == Cell.eType.Black)
+            if (i_Type == Cell.eType.Player1)
             {
                 type = 'X';
             }
-            else if (i_Type == Cell.eType.White)
+            else if (i_Type == Cell.eType.Player2)
             {
                 type = 'Y';
             }
