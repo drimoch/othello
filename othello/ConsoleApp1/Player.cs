@@ -45,7 +45,7 @@ namespace B19_Ex02_Othelo
 
         // Methods
         public Player(ePlayerID i_PlayerID)
-        { // constructor
+        {
             m_playerID = i_PlayerID;
             m_Score = 2; // 2 coins for each player when game starts
         }

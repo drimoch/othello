@@ -19,7 +19,7 @@ namespace B19_Ex02_Othelo
 
         public int[] StartGame()
         {
-            int[] gameProperties = PrintStartGameMenu(); //Return array [numOfPlayers,boardSize]
+            int[] gameProperties = PrintStartGameMenu(); //Return array [numOfPlayers, boardSize]
             return gameProperties;
         }
 
@@ -107,12 +107,12 @@ namespace B19_Ex02_Othelo
 
             if(i_Error == GameManager.eResponseCode.InvalidMove)
             {
-                Console.WriteLine("The cell you chose doesn't block the competitor's coins, please try again: ");
+                Console.WriteLine("The cell you chose doesn't block the competitor's coins, please try again:");
             }
 
             if(i_Error == GameManager.eResponseCode.NotEmpty)
             {
-                Console.WriteLine("The chosen cell is not empty, please try again: ");
+                Console.WriteLine("The chosen cell is not empty, please try again:");
             }
 
             return location;

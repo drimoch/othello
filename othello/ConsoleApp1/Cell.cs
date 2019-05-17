@@ -10,6 +10,18 @@ namespace B19_Ex02_Othelo
     {
         // Members
         private Location m_CellLocation;
+        public Location CellLocation
+        {
+            get
+            {
+                return m_CellLocation;
+            }
+            set
+            {
+                m_CellLocation = value;
+            }
+        }
+
         public enum eType
         {
             Empty, // empty cell
