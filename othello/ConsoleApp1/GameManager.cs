@@ -7,8 +7,8 @@ namespace B19_Ex02_Othelo
     class GameManager
     {
         // Members
-        private int[] m_ValidBoardSizes = { 6, 8 };
-        private ConsoleUI m_ConsoleUI;
+        private readonly int[] m_ValidBoardSizes = { 6, 8 };
+        private readonly ConsoleUI m_ConsoleUI;
         private Board m_GameBoard;
         private int m_NumOfPlayers;
         private Player m_Player1;
@@ -74,15 +74,22 @@ namespace B19_Ex02_Othelo
                 }
                 else
                 {
-                    string inputLocation = m_ConsoleUI.GetMoveFromUser(m_CurrentPlayer.PlayerID);
-                    Cell.Location location = parseLocation(inputLocation);
-                    eResponseCode moveResponse = calculateMove(location);
-                    while (moveResponse != eResponseCode.OK)
+                    if (m_CurrentPlayer.PlayerID == Player.ePlayerID.Computer)
                     {
-                        m_ConsoleUI.PrintErrorMessege(moveResponse);
-                        inputLocation = m_ConsoleUI.GetInputFromUser();
-                        location = parseLocation(inputLocation);
-                        moveResponse = calculateMove(location);
+                        makeComputerMove();
+                    }
+                    else
+                    {
+                        string inputLocation = m_ConsoleUI.GetMoveFromUser(m_CurrentPlayer.PlayerID);
+                        Cell.Location location = parseLocation(inputLocation);
+                        eResponseCode moveResponse = calculateMove(location);
+                        while (moveResponse != eResponseCode.OK)
+                        {
+                            m_ConsoleUI.PrintErrorMessege(moveResponse);
+                            inputLocation = m_ConsoleUI.GetInputFromUser();
+                            location = parseLocation(inputLocation);
+                            moveResponse = calculateMove(location);
+                        }
                     }
 
                     m_ConsoleUI.PrintTheBoardAfterTurn();
@@ -91,12 +98,39 @@ namespace B19_Ex02_Othelo
             }
         }
 
+        private void makeComputerMove()
+        {
+            Random random = new Random();
+            List<Cell> computerCells = getComputerValidCells();
+            int randomIndex = random.Next(computerCells.Count);
+            calculateMove(computerCells[randomIndex].CellLocation);
+        }
+
+        private List<Cell> getComputerValidCells()
+        {
+            List<Cell> computerValidCells = new List<Cell>();
+            List<Cell> tempList = new List<Cell>();
+            foreach (Cell cell in m_GameBoard.Matrix)
+            {
+                if (cell.CellType == Cell.eType.Empty)
+                {
+                    tempList = findCellsToFlip(cell.CellLocation, Cell.eType.Player2);
+                    if(tempList.Count > 0)
+                    {
+                        computerValidCells.Add(cell);
+                    }
+                }
+            }
+
+            return computerValidCells;
+        }
+
         private eResponseCode calculateMove(Cell.Location i_Location)
         {
             eResponseCode moveResult;
             if (m_GameBoard.Matrix[i_Location.X, i_Location.Y].CellType == Cell.eType.Empty)
             {
-                Cell.eType cellType = m_CurrentPlayer.PlayerID == Player.ePlayerID.Player1 ? Cell.eType.Player1 : Cell.eType.Player2;
+                Cell.eType cellType = m_CurrentPlayer.PlayerID == Player.ePlayerID.Player1 ? Cell.eType.Player1 : Cell.eType.Player2; // player2 can be also the computer
                 List<Cell> cellsToFlip = findCellsToFlip(i_Location, cellType);
                 if(cellsToFlip.Count == 0)
                 {
@@ -140,16 +174,13 @@ namespace B19_Ex02_Othelo
 
         private void changeCurrentPlayer()
         {
-            if (m_NumOfPlayers == 2)
+            if (m_CurrentPlayer.PlayerID == Player.ePlayerID.Player1)
             {
-                if (m_CurrentPlayer.PlayerID == Player.ePlayerID.Player1)
-                {
-                    m_CurrentPlayer = m_Player2;
-                }
-                else
-                {
-                    m_CurrentPlayer = m_Player1;
-                }
+                m_CurrentPlayer = m_Player2;
+            }
+            else
+            {
+                m_CurrentPlayer = m_Player1;
             }
         }
 

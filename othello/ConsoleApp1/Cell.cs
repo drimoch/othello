@@ -74,18 +74,11 @@ namespace B19_Ex02_Othelo
 
         // Methods
         public Cell(int i_X, int i_Y, eType i_Type = eType.Empty)
-        { // constructor
+        {
             m_CellLocation = new Location();
             m_CellType = i_Type;
             m_CellLocation.X = i_X;
             m_CellLocation.Y = i_Y;
-        }
-
-        public bool IsCellEmpty()
-        {
-            bool isEmpty = (m_CellType == eType.Empty); // if empty - return true
-
-            return isEmpty;
         }
     }
 }

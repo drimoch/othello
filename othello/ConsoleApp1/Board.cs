@@ -24,7 +24,7 @@ namespace B19_Ex02_Othelo
 
         // Methods
         public Board(int i_BoardSize)
-        { // constructor
+        {
             m_MatrixBoard = new Cell[i_BoardSize, i_BoardSize];
             createCells();
         }
@@ -41,7 +41,7 @@ namespace B19_Ex02_Othelo
         }
 
         public void InitializeBoard()
-        { // Set board matrix at the begining of the game
+        {
             cleanBoard();
             int middle = m_MatrixBoard.GetLength(0) / 2;
             Cell c = m_MatrixBoard[middle, middle];
@@ -51,22 +51,12 @@ namespace B19_Ex02_Othelo
             m_MatrixBoard[middle, middle].CellType = Cell.eType.Player2;
         }
 
-        public bool IsCellEmpty(Cell i_cell)
-        {
-            return i_cell.IsCellEmpty(); // if cell is empty - return true
-        }
-
         private void cleanBoard()
         {
             foreach (Cell cell in m_MatrixBoard)
             {
                 cell.CellType = Cell.eType.Empty;
             }
-        }
-
-        public void UpdateBoard(ref Cell i_Cell, Cell.eType i_Type)
-        {
-            i_Cell.CellType = i_Type;
         }
     }
 }

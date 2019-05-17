@@ -136,7 +136,7 @@ namespace B19_Ex02_Othelo
             return userInput;
         }
 
-        public void printBoard()
+        private void printBoard()
         {
             Cell[,] gameBoard = m_GameBoard.Matrix;
             int size = gameBoard.GetLength(0);
@@ -178,11 +178,11 @@ namespace B19_Ex02_Othelo
             char type;
             if (i_Type == Cell.eType.Player1)
             {
-                type = 'X';
+                type = 'O';
             }
             else if (i_Type == Cell.eType.Player2)
             {
-                type = 'Y';
+                type = 'X';
             }
             else
             {
