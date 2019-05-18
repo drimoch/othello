@@ -76,19 +76,19 @@ namespace B19_Ex02_Othelo
                 {
                     if (m_CurrentPlayer.PlayerID == Player.ePlayerID.Computer)
                     {
-                        makeComputerMove();
+                        makeAiMove();
                     }
                     else
                     {
                         string inputLocation = m_ConsoleUI.GetMoveFromUser(m_CurrentPlayer.PlayerID);
                         Cell.Location location = parseLocation(inputLocation);
-                        eResponseCode moveResponse = calculateMove(location);
+                        eResponseCode moveResponse = executeMove(location);
                         while (moveResponse != eResponseCode.OK)
                         {
                             m_ConsoleUI.PrintErrorMessege(moveResponse);
                             inputLocation = m_ConsoleUI.GetInputFromUser();
                             location = parseLocation(inputLocation);
-                            moveResponse = calculateMove(location);
+                            moveResponse = executeMove(location);
                         }
                     }
 
@@ -103,7 +103,28 @@ namespace B19_Ex02_Othelo
             Random random = new Random();
             List<Cell> computerCells = getComputerValidCells();
             int randomIndex = random.Next(computerCells.Count);
-            calculateMove(computerCells[randomIndex].CellLocation);
+            executeMove(computerCells[randomIndex].CellLocation);
+        }
+
+
+        //This function calculates all possible moves
+        //and choose the move that will gain the player most points
+        private void makeAiMove()
+        {
+            int bestScore = int.MinValue;
+            List<Cell> computerCells = getComputerValidCells();
+            Cell bestMove = computerCells[0];
+            foreach (Cell move in computerCells)
+            {
+                Board childBoard =m_GameBoard;
+                int nodeScore = calculateMoveOnChildBoard(move.CellLocation,childBoard);
+                if (nodeScore > bestScore)
+                {
+                    bestScore = nodeScore;
+                    bestMove = move;
+                }
+            }
+            executeMove(bestMove.CellLocation);
         }
 
         private List<Cell> getComputerValidCells()
@@ -125,7 +146,7 @@ namespace B19_Ex02_Othelo
             return computerValidCells;
         }
 
-        private eResponseCode calculateMove(Cell.Location i_Location)
+        private eResponseCode executeMove(Cell.Location i_Location)
         {
             eResponseCode moveResult;
             if (m_GameBoard.Matrix[i_Location.X, i_Location.Y].CellType == Cell.eType.Empty)
@@ -152,6 +173,23 @@ namespace B19_Ex02_Othelo
             return moveResult;
         }
 
+        private int calculateMoveOnChildBoard(Cell.Location i_Location,Board i_ChildBoard)
+        {
+            if (i_ChildBoard.Matrix[i_Location.X, i_Location.Y].CellType == Cell.eType.Empty)
+            {
+                Cell.eType cellType = m_CurrentPlayer.PlayerID == Player.ePlayerID.Player1 ? Cell.eType.Player1 : Cell.eType.Player2; // player2 can be also the computer
+                List<Cell> cellsToFlip = findCellsToFlip(i_Location, cellType,i_ChildBoard);
+                return cellsToFlip.Count;
+
+            }
+            else
+            {
+                return 0;
+            }
+
+        }
+
+
         private void updateScore(Player i_Player)
         {
             int counter = 0;
@@ -167,6 +205,7 @@ namespace B19_Ex02_Othelo
             i_Player.Score = counter;
         }
 
+  
         private void calculateWinner()
         {
             m_Winner = m_Player1.Score > m_Player2.Score ? m_Player1 : m_Player2;
@@ -237,6 +276,59 @@ namespace B19_Ex02_Othelo
             return cellsToFlip;
         }
 
+        private List<Cell> findCellsToFlip(Cell.Location i_Cell, Cell.eType i_CellType,Board i_ChildBoard)
+        {
+            List<Cell> cellsToFlip = new List<Cell>();
+            Cell.eType otherCellType = (i_CellType == Cell.eType.Player1 ? Cell.eType.Player2 : Cell.eType.Player1);
+            int[,] directionArr = new int[8, 2] { { 0, 1 }, { 1, 1 }, { 1, 0 }, { 1, -1 }, { 0, -1 }, { -1, -1 }, { -1, 0 }, { -1, 1 } };
+            for (int i = 0; i < directionArr.GetLength(0); i++)
+            {
+                int x = i_Cell.X;
+                int y = i_Cell.Y;
+                int xDirection = directionArr[i, 0];
+                int yDirection = directionArr[i, 1];
+                x += xDirection;
+                y += yDirection;
+                if (isOnMatrix(x, y) && i_ChildBoard.Matrix[x, y].CellType == otherCellType)
+                {
+                    x += xDirection;
+                    y += yDirection;
+                    if (!isOnMatrix(x, y))
+                    {
+                        continue;
+                    }
+
+                    while (i_ChildBoard.Matrix[x, y].CellType == otherCellType)
+                    {
+                        x += xDirection;
+                        y += yDirection;
+                        if (!isOnMatrix(x, y))
+                        {
+                            break;
+                        }
+                    }
+
+                    if (!isOnMatrix(x, y))
+                    {
+                        continue;
+                    }
+
+                    if (i_ChildBoard.Matrix[x, y].CellType == i_CellType)
+                    { // there are cells to flip - go in reverse to find them
+                        while (x != i_Cell.X || y != i_Cell.Y)
+                        {
+                            x -= xDirection;
+                            y -= yDirection;
+                            addToList<Cell>(ref cellsToFlip, i_ChildBoard.Matrix[x, y]);
+                        }
+                    }
+
+                }
+            }
+
+            return cellsToFlip;
+        }
+
         private void addToList<T>(ref List<T> i_List, T i_Item)
         {
             i_List.Add(i_Item);
@@ -249,6 +341,7 @@ namespace B19_Ex02_Othelo
                 cell.CellType = i_NewType;
             }
         }
+
 
         private bool isOnMatrix(int i_X, int i_Y)
         {
