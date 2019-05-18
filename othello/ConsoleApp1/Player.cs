@@ -8,16 +8,16 @@ namespace B19_Ex02_Othelo
 {
     public class Player
     {
-        public enum ePlayerID
-        {
-            Computer = 0,
-            Player1 = 1,
-            Player2 = 2           
-        }
-
         // Members
         private ePlayerID m_playerID;
         private int m_Score;
+
+        public enum ePlayerID
+        {
+            Computer,
+            Player1,
+            Player2           
+        }
 
         public int Score
         {
@@ -25,6 +25,7 @@ namespace B19_Ex02_Othelo
             {
                 return m_Score;
             }
+
             set
             {
                 m_Score = value;
@@ -37,6 +38,7 @@ namespace B19_Ex02_Othelo
             {
                 return m_playerID;
             }
+
             set
             {
                 m_playerID = value;

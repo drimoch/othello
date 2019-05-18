@@ -10,12 +10,15 @@ namespace B19_Ex02_Othelo
     {
         // Members
         private Location m_CellLocation;
+        private eType m_CellType;
+
         public Location CellLocation
         {
             get
             {
                 return m_CellLocation;
             }
+
             set
             {
                 m_CellLocation = value;
@@ -24,12 +27,10 @@ namespace B19_Ex02_Othelo
 
         public enum eType
         {
-            Empty, // empty cell
-            Player1, // X
-            Player2 // O
+            Empty,
+            Player1,
+            Player2 
         }
-
-        private eType m_CellType;
 
         public eType CellType
         {
@@ -37,6 +38,7 @@ namespace B19_Ex02_Othelo
             {
                 return m_CellType;
             }
+
             set
             {
                 m_CellType = value;
@@ -54,6 +56,7 @@ namespace B19_Ex02_Othelo
                 {
                     return x;
                 }
+
                 set
                 {
                     x = value;
@@ -65,6 +68,7 @@ namespace B19_Ex02_Othelo
                 {
                     return y;
                 }
+
                 set
                 {
                     y = value;
