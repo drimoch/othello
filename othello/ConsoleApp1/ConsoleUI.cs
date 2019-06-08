@@ -12,18 +12,65 @@ namespace B19_Ex02_Othelo
         private Board m_GameBoard = null; // will be sent by reference from GameManager
         private string m_FirstPlayerName;
         private string m_SecondPlayerName;
-
+        private GameManager m_GameManager;
         // Methods
-        public void InitBoard(ref Board io_Board)
+        public ConsoleUI()
         {
-            m_GameBoard = io_Board;
+            m_GameManager = new GameManager(new Action(Exit), new Action<eResponseCode>(PrintErrorMessege), new GetUserInput(GetInputFromUser));
         }
 
-        public int[] StartGame()
+
+        public void StartGame()
         {
             int[] gameProperties = PrintStartGameMenu(); //Return array [numOfPlayers, boardSize]
 
-            return gameProperties;
+            m_GameBoard = m_GameManager.InitiateGame(gameProperties[0], gameProperties[1]);
+            PrintTheBoardAfterTurn();
+            playTurns();
+        }
+        private void playTurns()
+        {
+            while (m_GameManager.Winner == null)
+            {
+                eResponseCode availableCells = m_GameManager.CheckValidCellsForBothPlayers();
+                if (availableCells == eResponseCode.NoValidCellsForBothPlayers)
+                {
+                    Player looser = m_GameManager.CalculateWinnerAndLooser();
+                    PrintErrorMessege(availableCells);
+                    GameOverMessege(m_GameManager.Winner, looser, m_GameManager.Player1.Score, m_GameManager.Player2.Score);
+                    FinishGame();
+                }
+                else if (availableCells == eResponseCode.NoValidCellsForPlayer)
+                {
+                    PrintErrorMessege(availableCells);
+                }
+                else
+                {
+                    if (m_GameManager.CurrentPlayer.PlayerID == Player.ePlayerID.Computer)
+                    {
+                        m_GameManager.MakeAiMove();
+                    }
+                    else
+                    {
+                        string inputLocation = GetMoveFromUser(m_GameManager.CurrentPlayer.PlayerID);
+
+                        Cell.Location location = m_GameManager.ParseLocation(inputLocation);
+                        eResponseCode moveResponse = m_GameManager.ExecuteMove(location);
+                        while (moveResponse != eResponseCode.OK)
+                        {
+                            PrintErrorMessege(moveResponse);
+                            inputLocation = GetInputFromUser();
+
+                            location = m_GameManager.ParseLocation(inputLocation);
+                            moveResponse = m_GameManager.ExecuteMove(location);
+                        }
+                    }
+
+                    PrintTheBoardAfterTurn();
+                }
+
+                m_GameManager.ChangeCurrentPlayer();
+            }
         }
 
         public int[] PrintStartGameMenu()
@@ -84,7 +131,7 @@ namespace B19_Ex02_Othelo
         {
             string playerName;
 
-            switch(i_CurrentPlayer)
+            switch (i_CurrentPlayer)
             {
                 case Player.ePlayerID.Player1:
                     playerName = m_FirstPlayerName;
@@ -103,26 +150,26 @@ namespace B19_Ex02_Othelo
             return playerName;
         }
 
-        public void PrintErrorMessege(GameManager.eResponseCode i_Error)
+        public void PrintErrorMessege(eResponseCode i_Error)
         {
-            switch(i_Error)
+            switch (i_Error)
             {
-                case GameManager.eResponseCode.CellIsInvalid:
+                case eResponseCode.CellIsInvalid:
                     Console.WriteLine("The chosen cell is invalid, please choose another cell:");
                     break;
-                case GameManager.eResponseCode.NoValidCellsForPlayer:
+                case eResponseCode.NoValidCellsForPlayer:
                     Console.WriteLine("You have no valid cells. The turn will be moved to the second player");
                     break;
-                case GameManager.eResponseCode.NoValidCellsForBothPlayers:
+                case eResponseCode.NoValidCellsForBothPlayers:
                     Console.WriteLine("Both players have no valid cells");
                     break;
-                case GameManager.eResponseCode.InvalidMove:
+                case eResponseCode.InvalidMove:
                     Console.WriteLine("The cell you chose doesn't block the competitor's coins, please try again:");
                     break;
-                case GameManager.eResponseCode.NotEmpty:
+                case eResponseCode.NotEmpty:
                     Console.WriteLine("The chosen cell is not empty, please try again:");
                     break;
-                case GameManager.eResponseCode.OutOfRange:
+                case eResponseCode.OutOfRange:
                     Console.WriteLine("The chosen cell is out of range, please try again:");
                     break;
                 default:
@@ -138,7 +185,7 @@ namespace B19_Ex02_Othelo
 
         private void cleanScreen()
         {
-            Ex02.ConsoleUtils.Screen.Clear();
+            Console.Clear();
         }
 
         public string GetInputFromUser()
@@ -191,7 +238,7 @@ namespace B19_Ex02_Othelo
         {
             char type;
 
-            switch(i_Type)
+            switch (i_Type)
             {
                 case Cell.eType.Player1:
                     type = 'O';
@@ -220,6 +267,19 @@ namespace B19_Ex02_Othelo
             Console.WriteLine(endGameMsg);
         }
 
+        public void FinishGame()
+        {
+
+            if (StartNewGame())
+            {
+               m_GameManager.InitiateGame(m_GameManager.NumOfPlayers, m_GameBoard.Matrix.GetLength(0));
+            }
+            else
+            {
+                Exit();
+            }
+        }
+
         public bool StartNewGame()
         {
             bool startNewGame;
@@ -241,6 +301,11 @@ namespace B19_Ex02_Othelo
         public void GoodbyeMessege()
         {
             Console.WriteLine("It was a pleasure! Goodbye!");
+        }
+        private void Exit()
+        {
+            GoodbyeMessege();
+            System.Environment.Exit(1);
         }
     }
 }

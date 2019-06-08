@@ -10,7 +10,7 @@ namespace B19_Ex02_Othelo
     {
         public static void Main()
         {
-            GameManager gameManager = new GameManager();
+            ConsoleUI gameManager = new ConsoleUI();
             gameManager.StartGame();
         }
     }

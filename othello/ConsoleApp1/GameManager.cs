@@ -4,105 +4,131 @@ using System.Text;
 
 namespace B19_Ex02_Othelo
 {
+    public delegate string GetUserInput();
     public class GameManager
     {
         // Members
         private readonly int[] r_ValidBoardSizes = { 6, 8 };
-        private readonly ConsoleUI r_ConsoleUI;
         private Board m_GameBoard;
         private int m_NumOfPlayers;
         private Player m_Player1;
         private Player m_Player2;
         private Player m_Winner;
         private Player m_CurrentPlayer;
+        public event Action OnExit;
+        public event GetUserInput OnGetUserInput;
 
-        public enum eResponseCode
+        public event Action<eResponseCode> OnPrintErrorMessage;
+
+
+        public GameManager(Action i_Exit, Action<eResponseCode> i_PrintMessage, GetUserInput i_GetUserInput)
         {
-            CellIsInvalid,
-            NoValidCellsForPlayer,
-            NoValidCellsForBothPlayers,
-            InvalidMove,
-            NotEmpty,
-            OutOfRange,
-            OK // no error
+            OnExit += i_Exit;
+            OnPrintErrorMessage += i_PrintMessage;
+            OnGetUserInput += i_GetUserInput;
         }
-
-        // Methods
-        public GameManager()
+        public Player Winner
         {
-            r_ConsoleUI = new ConsoleUI();
-        }
-
-        public void StartGame()
-        {
-            int[] gameInitInfo = r_ConsoleUI.StartGame();
-
-            initiateGame(gameInitInfo[0], gameInitInfo[1]);
-        }
-
-        private void initiateGame(int i_NumOfPlayers, int i_BoardSize)
-        {
-            m_GameBoard = new Board(i_BoardSize);
-            m_Winner = null;
-            r_ConsoleUI.InitBoard(ref m_GameBoard);
-            m_NumOfPlayers = i_NumOfPlayers;
-            initPlayers();
-            m_GameBoard.InitializeBoard();
-            printBoard();
-            playTurns();
-        }
-
-        private void printBoard()
-        {
-            r_ConsoleUI.PrintTheBoardAfterTurn();
-        }
-
-        private void playTurns()
-        {
-            while (m_Winner == null)
+            get
             {
-                eResponseCode availableCells = checkValidCellsForBothPlayers();
-                if (availableCells == eResponseCode.NoValidCellsForBothPlayers)
-                {
-                    Player looser = calculateWinnerAndLooser();
-                    r_ConsoleUI.PrintErrorMessege(availableCells);
-                    r_ConsoleUI.GameOverMessege(m_Winner, looser, m_Player1.Score, m_Player2.Score);
-                    finishGame();
-                }
-                else if (availableCells == eResponseCode.NoValidCellsForPlayer)
-                {
-                    r_ConsoleUI.PrintErrorMessege(availableCells);
-                }
-                else
-                {
-                    if (m_CurrentPlayer.PlayerID == Player.ePlayerID.Computer)
-                    {
-                        makeAiMove();
-                    }
-                    else
-                    {
-                        string inputLocation = r_ConsoleUI.GetMoveFromUser(m_CurrentPlayer.PlayerID);
-                        Cell.Location location = parseLocation(inputLocation);
-                        eResponseCode moveResponse = executeMove(location);
-                        while (moveResponse != eResponseCode.OK)
-                        {
-                            r_ConsoleUI.PrintErrorMessege(moveResponse);
-                            inputLocation = r_ConsoleUI.GetInputFromUser();
-                            location = parseLocation(inputLocation);
-                            moveResponse = executeMove(location);
-                        }
-                    }
-
-                    r_ConsoleUI.PrintTheBoardAfterTurn();
-                }
-
-                changeCurrentPlayer();
+                return m_Winner;
             }
         }
 
+        public Player Player1
+        {
+            get
+            {
+                return m_Player1;
+            }
+        }
+
+        public Player Player2
+        {
+            get
+            {
+                return m_Player2;
+            }
+        }
+
+        public Player CurrentPlayer
+        {
+            get
+            {
+                return m_CurrentPlayer;
+            }
+        }
+
+        public int NumOfPlayers
+        {
+            get
+            {
+                return m_NumOfPlayers;
+            }
+        }
+
+        // Methods
+
+
+        internal Board InitiateGame(int i_NumOfPlayers, int i_BoardSize)
+        {
+            m_GameBoard = new Board(i_BoardSize);
+            m_Winner = null;
+            m_NumOfPlayers = i_NumOfPlayers;
+            initPlayers();
+            m_GameBoard.InitializeBoard();
+
+            return m_GameBoard;
+        }
+
+
+
+        //private void playTurns()
+        //{
+        //    while (m_Winner == null)
+        //    {
+        //        eResponseCode availableCells = checkValidCellsForBothPlayers();
+        //        if (availableCells == eResponseCode.NoValidCellsForBothPlayers)
+        //        {
+        //            Player looser = calculateWinnerAndLooser();
+        //            r_ConsoleUI.PrintErrorMessege(availableCells);
+        //            r_ConsoleUI.GameOverMessege(m_Winner, looser, m_Player1.Score, m_Player2.Score);
+        //            finishGame();
+        //        }
+        //        else if (availableCells == eResponseCode.NoValidCellsForPlayer)
+        //        {
+        //            r_ConsoleUI.PrintErrorMessege(availableCells);
+        //        }
+        //        else
+        //        {
+        //            if (m_CurrentPlayer.PlayerID == Player.ePlayerID.Computer)
+        //            {
+        //                makeAiMove();
+        //            }
+        //            else
+        //            {
+        //                string inputLocation = r_ConsoleUI.GetMoveFromUser(m_CurrentPlayer.PlayerID);
+        //                Cell.Location location = parseLocation(inputLocation);
+        //                eResponseCode moveResponse = ExecuteMove(location);
+        //                while (moveResponse != eResponseCode.OK)
+        //                {
+        //                    r_ConsoleUI.PrintErrorMessege(moveResponse);
+        //                    inputLocation = r_ConsoleUI.GetInputFromUser();
+        //                    location = parseLocation(inputLocation);
+        //                    moveResponse = ExecuteMove(location);
+        //                }
+        //            }
+
+        //            r_ConsoleUI.PrintTheBoardAfterTurn();
+        //        }
+
+        //        changeCurrentPlayer();
+        //    }
+        //}
+
         //This function calculates all possible moves
         //and choose the move that will gain the player most points
-        private void makeAiMove()
+        public void MakeAiMove()
         {
             int bestScore = int.MinValue;
             List<Cell> computerCells = getComputerValidCells();
@@ -121,7 +147,7 @@ namespace B19_Ex02_Othelo
                 }
             }
 
-            executeMove(bestMove.CellLocation);
+            ExecuteMove(bestMove.CellLocation);
         }
 
         private List<Cell> getComputerValidCells()
@@ -134,7 +160,7 @@ namespace B19_Ex02_Othelo
                 if (cell.CellType == Cell.eType.Empty)
                 {
                     tempList = findCellsToFlip(cell.CellLocation, Cell.eType.Player2);
-                    if(tempList.Count > 0)
+                    if (tempList.Count > 0)
                     {
                         computerValidCells.Add(cell);
                     }
@@ -144,7 +170,7 @@ namespace B19_Ex02_Othelo
             return computerValidCells;
         }
 
-        private eResponseCode executeMove(Cell.Location i_Location)
+        public eResponseCode ExecuteMove(Cell.Location i_Location)
         {
             eResponseCode moveResult;
             List<Cell> cellsToFlip = getListOfCellsToFlip(i_Location);
@@ -152,7 +178,7 @@ namespace B19_Ex02_Othelo
             if (m_GameBoard.Matrix[i_Location.X, i_Location.Y].CellType == Cell.eType.Empty)
             {
                 Cell.eType cellType = getCurrentCellType(m_CurrentPlayer.PlayerID); // player2 can be also the computer
-                if(cellsToFlip.Count == 0)
+                if (cellsToFlip.Count == 0)
                 {
                     moveResult = eResponseCode.InvalidMove;
                 }
@@ -193,9 +219,9 @@ namespace B19_Ex02_Othelo
             int counter = 0;
             Cell.eType playerCells = i_Player.PlayerID == Player.ePlayerID.Player1 ? Cell.eType.Player1 : Cell.eType.Player2;
 
-            foreach(Cell cell in m_GameBoard.Matrix)
+            foreach (Cell cell in m_GameBoard.Matrix)
             {
-                if(cell.CellType == playerCells)
+                if (cell.CellType == playerCells)
                 {
                     counter++;
                 }
@@ -204,7 +230,7 @@ namespace B19_Ex02_Othelo
             i_Player.Score = counter;
         }
 
-        private Player calculateWinnerAndLooser()
+        public Player CalculateWinnerAndLooser()
         {
             m_Winner = m_Player1.Score > m_Player2.Score ? m_Player1 : m_Player2;
             Player looser = m_Player1.Score > m_Player2.Score ? m_Player2 : m_Player1;
@@ -212,7 +238,7 @@ namespace B19_Ex02_Othelo
             return looser;
         }
 
-        private void changeCurrentPlayer()
+        public void ChangeCurrentPlayer()
         {
             if (m_CurrentPlayer.PlayerID == Player.ePlayerID.Player1)
             {
@@ -228,7 +254,7 @@ namespace B19_Ex02_Othelo
         {
             List<Cell> cellsToFlip = new List<Cell>();
             Cell.eType otherCellType = i_CellType == Cell.eType.Player1 ? Cell.eType.Player2 : Cell.eType.Player1;
-            int[,] directionArr = new int[8, 2] { {0,1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1} };
+            int[,] directionArr = new int[8, 2] { { 0, 1 }, { 1, 1 }, { 1, 0 }, { 1, -1 }, { 0, -1 }, { -1, -1 }, { -1, 0 }, { -1, 1 } };
 
             for (int i = 0; i < directionArr.GetLength(0); i++)
             {
@@ -285,7 +311,7 @@ namespace B19_Ex02_Othelo
 
         private void flipCells(List<Cell> i_ListOfCells, Cell.eType i_NewType)
         {
-            foreach(Cell cell in i_ListOfCells)
+            foreach (Cell cell in i_ListOfCells)
             {
                 cell.CellType = i_NewType;
             }
@@ -303,12 +329,12 @@ namespace B19_Ex02_Othelo
             List<Cell> availableCells = new List<Cell>();
             eResponseCode response = eResponseCode.NoValidCellsForPlayer;
 
-            foreach(Cell cell in m_GameBoard.Matrix)
+            foreach (Cell cell in m_GameBoard.Matrix)
             {
-                if(cell.CellType == Cell.eType.Empty)
+                if (cell.CellType == Cell.eType.Empty)
                 {
                     availableCells = findCellsToFlip(cell.CellLocation, i_Type);
-                    if(availableCells.Count > 0)
+                    if (availableCells.Count > 0)
                     {
                         response = eResponseCode.OK;
                         break;
@@ -319,16 +345,16 @@ namespace B19_Ex02_Othelo
             return response;
         }
 
-        private eResponseCode checkValidCellsForBothPlayers()
+        public eResponseCode CheckValidCellsForBothPlayers()
         {
             eResponseCode response;
             Cell.eType currentType = m_CurrentPlayer.PlayerID == Player.ePlayerID.Player1 ? Cell.eType.Player1 : Cell.eType.Player2;
 
-            if(checkValidCellsForPlayer(Cell.eType.Player1) == eResponseCode.NoValidCellsForPlayer && checkValidCellsForPlayer(Cell.eType.Player2) == eResponseCode.NoValidCellsForPlayer)
+            if (checkValidCellsForPlayer(Cell.eType.Player1) == eResponseCode.NoValidCellsForPlayer && checkValidCellsForPlayer(Cell.eType.Player2) == eResponseCode.NoValidCellsForPlayer)
             {
                 response = eResponseCode.NoValidCellsForBothPlayers;
             }
-            else if(checkValidCellsForPlayer(currentType) == eResponseCode.NoValidCellsForPlayer)
+            else if (checkValidCellsForPlayer(currentType) == eResponseCode.NoValidCellsForPlayer)
             {
                 response = eResponseCode.NoValidCellsForPlayer;
             }
@@ -354,18 +380,18 @@ namespace B19_Ex02_Othelo
             }
         }
 
-        private Cell.Location parseLocation(string i_InputLocation)
+        public Cell.Location ParseLocation(string i_InputLocation)
         {
             if (i_InputLocation == "Q") // Quit game
             {
-                Exit();
+                OnExit.Invoke();
             }
 
             eResponseCode response = locationInputValidation(i_InputLocation);
             while (response != eResponseCode.OK)
             {
-                r_ConsoleUI.PrintErrorMessege(response);
-                i_InputLocation = r_ConsoleUI.GetInputFromUser();
+                OnPrintErrorMessage.Invoke(response);
+                i_InputLocation = OnGetUserInput.Invoke();
                 response = locationInputValidation(i_InputLocation);
             }
 
@@ -393,23 +419,8 @@ namespace B19_Ex02_Othelo
             return sendResponse;
         }
 
-        private void finishGame()
-        {
-            if (r_ConsoleUI.StartNewGame())
-            {
-                initiateGame(m_NumOfPlayers, m_GameBoard.Matrix.GetLength(0));
-            }
-            else
-            {
-                Exit();
-            }
-        }
 
-        private void Exit()
-        {
-            r_ConsoleUI.GoodbyeMessege();
-            System.Environment.Exit(1);
-        }
+
 
         /*private void makeComputerMoveRandom()
         {
