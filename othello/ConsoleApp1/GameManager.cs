@@ -82,50 +82,6 @@ namespace B19_Ex02_Othelo
         }
 
 
-
-        //private void playTurns()
-        //{
-        //    while (m_Winner == null)
-        //    {
-        //        eResponseCode availableCells = checkValidCellsForBothPlayers();
-        //        if (availableCells == eResponseCode.NoValidCellsForBothPlayers)
-        //        {
-        //            Player looser = calculateWinnerAndLooser();
-        //            r_ConsoleUI.PrintErrorMessege(availableCells);
-        //            r_ConsoleUI.GameOverMessege(m_Winner, looser, m_Player1.Score, m_Player2.Score);
-        //            finishGame();
-        //        }
-        //        else if (availableCells == eResponseCode.NoValidCellsForPlayer)
-        //        {
-        //            r_ConsoleUI.PrintErrorMessege(availableCells);
-        //        }
-        //        else
-        //        {
-        //            if (m_CurrentPlayer.PlayerID == Player.ePlayerID.Computer)
-        //            {
-        //                makeAiMove();
-        //            }
-        //            else
-        //            {
-        //                string inputLocation = r_ConsoleUI.GetMoveFromUser(m_CurrentPlayer.PlayerID);
-        //                Cell.Location location = parseLocation(inputLocation);
-        //                eResponseCode moveResponse = ExecuteMove(location);
-        //                while (moveResponse != eResponseCode.OK)
-        //                {
-        //                    r_ConsoleUI.PrintErrorMessege(moveResponse);
-        //                    inputLocation = r_ConsoleUI.GetInputFromUser();
-        //                    location = parseLocation(inputLocation);
-        //                    moveResponse = ExecuteMove(location);
-        //                }
-        //            }
-
-        //            r_ConsoleUI.PrintTheBoardAfterTurn();
-        //        }
-
-        //        changeCurrentPlayer();
-        //    }
-        //}
-
         //This function calculates all possible moves
         //and choose the move that will gain the player most points
         public void MakeAiMove()
